@@ -1,66 +1,70 @@
 import React, { useState } from 'react';
-import Entrada from './Entrada';
+import { agregarEmpleado } from '../services/empleadoService';
 import Swal from 'sweetalert2';
-import { guardarEmpleado } from '../services/empleadoService';
 
 const ModalAgregar = ({ actualizarLista }) => {
-  const [form, setForm] = useState({
+  const [show, setShow] = useState(false);
+  const [empleado, setEmpleado] = useState({
     nombre: '',
     dni: '',
     direccion: '',
     email: '',
   });
 
+  // Manejar cambios en los inputs
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setEmpleado({ ...empleado, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.nombre || !form.dni || !form.direccion || !form.email) {
+  // Guardar empleado
+  const handleGuardar = async () => {
+    if (!empleado.nombre || !empleado.dni || !empleado.direccion || !empleado.email) {
       Swal.fire('Error', 'Todos los campos son obligatorios', 'error');
       return;
     }
-    try {
-      await guardarEmpleado(form);
+
+    const resultado = await agregarEmpleado(empleado);
+    if (resultado) {
       Swal.fire('Éxito', 'Empleado agregado correctamente', 'success');
-      setForm({ nombre: '', dni: '', direccion: '', email: '' });
       actualizarLista();
-    } catch (error) {
-      Swal.fire('Error', 'No se pudo guardar el empleado', 'error');
+      setShow(false); // Cerrar modal
+      setEmpleado({ nombre: '', dni: '', direccion: '', email: '' }); // Limpiar formulario
+    } else {
+      Swal.fire('Error', 'No se pudo agregar el empleado', 'error');
     }
   };
 
   return (
-    <>
-      <button
-        className="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#modalAgregar"
-      >
+    <div>
+      {/* Botón para abrir el modal */}
+      <button className="btn btn-success mb-3" onClick={() => setShow(true)}>
         Agregar Empleado
       </button>
 
-      <div className="modal fade" id="modalAgregar" tabIndex="-1">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Agregar Empleado</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={handleSubmit}>
-                <Entrada label="Nombre" type="text" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Ingrese nombre" />
-                <Entrada label="DNI" type="text" name="dni" value={form.dni} onChange={handleChange} placeholder="Ingrese DNI" />
-                <Entrada label="Dirección" type="text" name="direccion" value={form.direccion} onChange={handleChange} placeholder="Ingrese dirección" />
-                <Entrada label="Email" type="email" name="email" value={form.email} onChange={handleChange} placeholder="Ingrese email" />
-                <button type="submit" className="btn btn-success">Guardar</button>
-              </form>
+      {/* Modal de Bootstrap */}
+      {show && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Agregar Empleado</h5>
+                <button type="button" className="btn-close" onClick={() => setShow(false)}></button>
+              </div>
+              <div className="modal-body">
+                <input type="text" className="form-control mb-2" name="nombre" placeholder="Nombre" onChange={handleChange} value={empleado.nombre} />
+                <input type="text" className="form-control mb-2" name="dni" placeholder="DNI" onChange={handleChange} value={empleado.dni} />
+                <input type="text" className="form-control mb-2" name="direccion" placeholder="Dirección" onChange={handleChange} value={empleado.direccion} />
+                <input type="email" className="form-control mb-2" name="email" placeholder="Email" onChange={handleChange} value={empleado.email} />
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setShow(false)}>Cerrar</button>
+                <button className="btn btn-primary" onClick={handleGuardar}>Guardar</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 };
 

@@ -7,17 +7,17 @@ export const obtenerEmpleados = async () => {
     const response = await axios.get(API_URL);
     return response.data;
   } catch (error) {
-    console.error('Error obteniendo empleados:', error);
+    console.error('Error al obtener empleados:', error);
     return [];
   }
 };
 
-export const guardarEmpleado = async (empleado) => {
+export const agregarEmpleado = async (empleado) => {
   try {
-    const response = await axios.post(API_URL, empleado);
-    return response.data;
+    await axios.post(API_URL, empleado);
+    return true;
   } catch (error) {
-    console.error('Error guardando empleado:', error);
-    throw error;
+    console.error('Error al agregar empleado:', error);
+    return false;
   }
 };
